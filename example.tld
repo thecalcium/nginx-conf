@@ -1,0 +1,90 @@
+# DO NOT USE THIS CONFIG WITHOUT KNOWING WHAT EVERYTHING IN IT DOES/HOW IT WORKS!!!!
+
+# You should read the comments (lines starting with a # like this one) in full since they
+# explain in great detail what each setting in this config does. If you still don't
+# understand something, GOOGLE IT! If I find anyone using this config without understanding
+# it, I will hunt you down and laugh in your face when something breaks.
+
+# Hopefully it's obvious that example.tld is just a placeholder and that you need to replace
+# "example.tld" with your actual domain where it appears below for any of this to work.
+
+
+
+
+
+
+
+
+
+
+# First, we want to permanently rewrite our site's www subdomain to the base domain for SEO reasons.
+# You can do this the other way around if you want (rewrite base domain to www), but only do one and
+# stick with it, otherwise visitors could end up in a redirect loop until they clear their cache.
+server {
+	server_name www.example.tld;
+	# Using $scheme allows this to with both https and http requests.
+	rewrite ^ $scheme://example.tld$request_uri permanent;
+}
+
+server {
+	# Port that nginx should listen on, this should be 80 in most if not all cases.
+	listen 80;
+
+	# Root folder for all of this site's files. We use /home/ for this since in most
+	# environments it has a larger quota. Change www-user to the name of your web user.
+	root /home/www-user/example.tld/;
+
+	# Files to treat as indexs. Remove index.php as an option if you don't have PHP enabled.
+	index index.html index.htm index.php;
+
+	# Domain(s) for this site. You can define more than one if you wish by seperating them with a space.
+	server_name example.tld;
+
+	# Location blocks are used to define rules for a URI
+	# Locations are relitive, so / means the entire site starting from the root folder defined above.
+	location / {
+		# First we want to try to serve a requested URI as file, then a directory. If that fails, the
+		# requested resource doesn't exist, and we should fall back to displaying a 404.
+		try_files $uri $uri/ 404;
+	}
+
+	# Next we need to define custom error pages since the default nginx ones are pretty plain.
+	# Only the first entry (the one for 404 errors) will be commented, but all info applies to
+	# the 403 and 50x entries as well.
+
+	# First we define that this error page is only for 404 errors. We then tell the server that the
+	# file we should serve for this error is called 404.html and is located in the root of our website.
+	error_page 404 /404.html;
+	# We set the location of the error page to internal to prevent clients from fetching it directly.
+	location  /404.html {
+		internal;
+	}
+
+	# 403 Forbidden
+	error_page 403 /403.html;
+	location  /403.html {
+		internal;
+	}
+
+	# 50x Server Errors
+	# These all point to the same error page since users don't need the exact reason why the site broke,
+	# and the as the system admin you can just check /var/logs/nginx/error.log to get the info you need.
+	error_page 500 502 503 504 /50x.html;
+	location  /50x.html {
+		internal;
+	}
+
+	# Finaly, we setup PHP5 using fpm. Setup of the PHP-FPM service it's self is beyond the scope of
+	# this example config. If you don't require PHP, just delete the following block and don't install
+	# PHP since it can be a security issue and a constant headache at times. This example uses Unix sockets.
+
+	location ~ \.php$ {
+		try_files $uri =404;
+		fastcgi_pass unix:/var/run/php5-fpm.sock;
+		fastcgi_index index.php;
+		fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+		include fastcgi_params;
+	}
+
+# And that's it.
+}
