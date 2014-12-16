@@ -3,10 +3,10 @@
 # You should read the comments (lines starting with a # like this one) in full since they
 # explain in great detail what each setting in this config does. If you still don't
 # understand something, GOOGLE IT! If I find anyone using this config without understanding
-# it, I will hunt you down and laugh in your face when something breaks.
+# it, I will laugh in your face when it breaks and you can't figure it out.
 
-# Hopefully it's obvious that example.tld is just a placeholder and that you need to replace
-# "example.tld" with your actual domain where it appears below for any of this to work.
+# Hopefully it's obvious that example.com is just a placeholder and that you need to replace
+# "example.com" with your actual domain where it appears below for any of this to work.
 
 
 
@@ -21,9 +21,9 @@
 # You can do this the other way around if you want (rewrite base domain to www), but only do one and
 # stick with it, otherwise visitors could end up in a redirect loop until they clear their cache.
 server {
-	server_name www.example.tld;
+	server_name www.example.com;
 	# Using $scheme allows this to with both https and http requests.
-	rewrite ^ $scheme://example.tld$request_uri permanent;
+	rewrite ^ $scheme://example.com$request_uri permanent;
 }
 
 server {
@@ -32,13 +32,13 @@ server {
 
 	# Root folder for all of this site's files. We use /home/ for this since in most
 	# environments it has a larger quota. Change www-user to the name of your web user.
-	root /home/www-user/example.tld/;
+	root /home/www-user/example.com/;
 
 	# Files to treat as indexs. Remove index.php as an option if you don't have PHP enabled.
 	index index.html index.htm index.php;
 
 	# Domain(s) for this site. You can define more than one if you wish by seperating them with a space.
-	server_name example.tld;
+	server_name example.com example.org example.net;
 
 	# Location blocks are used to define rules for a URI
 	# Locations are relitive, so / means the entire site starting from the root folder defined above.
@@ -48,8 +48,8 @@ server {
 		try_files $uri $uri/ 404;
 	}
 
-	# Next we need to define custom error pages since the default nginx ones are pretty plain.
-	# Only the first entry (the one for 404 errors) will be commented, but all info applies to
+	# Next we need to define custom error pages since the default nginx ones are pretty boring.
+	# Only the first entry will be commented, but all comments for the 404 location block apply to
 	# the 403 and 50x entries as well.
 
 	# First we define that this error page is only for 404 errors. We then tell the server that the
@@ -73,10 +73,15 @@ server {
 	location  /50x.html {
 		internal;
 	}
+	
+	# You can add custom server error pages for other error types here as you see fit using the above
+	# entries as a template. Note that it is good practice to at least have custom 404 and 403 pages.
 
-	# Finaly, we setup PHP5 using fpm. Setup of the PHP-FPM service it's self is beyond the scope of
+
+	# Finaly, we setup PHP5 using fpm. Setup of the PHP-FPM service itself is beyond the scope of
 	# this example config. If you don't require PHP, just delete the following block and don't install
-	# PHP since it can be a security issue and a constant headache at times. This example uses Unix sockets.
+	# PHP since it can be a constant headache and a security issue at times. This example uses Unix
+	# sockets since I nor anyone I've ever met has been able to successfuly PHP-FPM using ports.
 
 	location ~ \.php$ {
 		try_files $uri =404;
