@@ -2,8 +2,7 @@
 
 # You should read the comments (lines starting with a # like this one) in full since they
 # explain in great detail what each setting in this config does. If you still don't
-# understand something, GOOGLE IT! If I find anyone using this config without understanding
-# it, I will laugh in your face when it breaks and you can't figure it out.
+# understand something, GOOGLE IT!
 
 # Hopefully it's obvious that example.com is just a placeholder and that you need to replace
 # "example.com" with your actual domain where it appears below for any of this to work.
@@ -22,7 +21,7 @@
 # stick with it, otherwise visitors could end up in a redirect loop until they clear their cache.
 server {
 	server_name www.example.com;
-	# Using $scheme allows this to with both https and http requests.
+	# Using $scheme allows this to work with both https and http requests.
 	rewrite ^ $scheme://example.com$request_uri permanent;
 }
 
