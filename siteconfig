@@ -6,6 +6,7 @@
 
 # Hopefully it's obvious that example.com is just a placeholder and that you need to replace
 # "example.com" with your actual domain where it appears below for any of this to work.
+# IPs in the 192.0.2.0/24 range are also examples, and should be replaced with your own IPs.
 
 
 
@@ -77,16 +78,33 @@ server {
 	# entries as a template. Note that it is good practice to at least have custom 404 and 403 pages.
 
 
-	# Finaly, we setup PHP5 using fpm. Setup of the PHP-FPM service itself is beyond the scope of
-	# this example config. If you don't require PHP, just delete the following block and don't install
-	# PHP since it can be a constant headache and a security issue at times. This example uses Unix
-	# sockets since I nor anyone I've ever met has been able to successfuly PHP-FPM using ports.
+	# Finaly, we setup PHP5 using fpm. If you don't require PHP, just delete / comment out the following
+	# block and don't install PHP since it can be a constant headache and a security issue at times.
 
+	# First, we tell nginx that this config block only should be used with requests to files ending with
+	# the extension ".php". Feel free to modify the regex rule to allow for other extensions as needed.
 	location ~ \.php$ {
+		# If the file requested doesn't exist, display a 404 "Not Found" error.
 		try_files $uri =404;
+
+		# If the requested file does exist, we pass it to the PHP-FPM process listening on the unix
+		# socket at "unix:/var/run/php5-fpm.sock" via FastCGI for parsing (socket location may vary).
 		fastcgi_pass unix:/var/run/php5-fpm.sock;
+
+		# Alternatively, we can pass it to a different PHP-FPM process listening on a local port...
+		#fastcgi_pass 127.0.0.1:9000;
+
+		# Or we could even pass it to an entirely different remote server running PHP-FPM to offload
+		# the process from the main machine(s). Make sure to firewall off the remote server from unknown
+		# traffic (read: everything but your frontend webservers) using something like IPTables.
+		#fastcgi_pass 192.0.2.1
+
+		# Next, we define the "index" filename. Should be the same as the index file we defined earlier.
 		fastcgi_index index.php;
+		
+		# Finally, we define a list of parameters that are required by the PHP-FPM process...
 		fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+		# ...and then include them with the passed request.
 		include fastcgi_params;
 	}
 
